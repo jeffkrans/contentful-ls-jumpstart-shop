@@ -1,31 +1,42 @@
 import Head from "next/head";
 import Link from "next/link";
+import _ from "lodash";
+import NavComponent from "../components/NavComponent";
 
 const MainLayout = (props) => {
-  return <>
-    <Head>
-      <title>Jumpstart Shop</title>
-    </Head>
+  const globalNavigation = props.globalNavigation || null;
 
-    <div className="mt-4 p-2 bg-blau text-white">
-      <Link href="/">
-        Nav
-      </Link>
-    </div>
+  // Debug logging to see the structure
+  console.log("Global Navigation:", globalNavigation);
 
-    <main>
-      <div className="h-screenx py-20 px-60"> {props.children}</div>
-    </main>
-    <div className="mt-4 p-2 bg-blau text-white">
-      <a
-        href="https://training.contentful.com"
-        target="_blank"
-        rel="noreferrer"
-      >
-        Contentful Learning Services
-      </a>
-    </div>
-  </>;
+  return (
+    <>
+      <Head>
+        <title>Jumpstart Shop</title>
+      </Head>
+
+      <div className="mt-4 p-2 bg-blau text-white flex items-center gap-4">
+        <Link href="/" className="hover:text-gelb transition-colors">
+          Home
+        </Link>
+
+        <NavComponent globalNavigation={globalNavigation} />
+      </div>
+
+      <main>
+        <div className="h-screenx py-20 px-60"> {props.children}</div>
+      </main>
+      <div className="mt-4 p-2 bg-blau text-white">
+        <a
+          href="https://training.contentful.com"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Contentful Learning Services
+        </a>
+      </div>
+    </>
+  );
 };
 
 export default MainLayout;

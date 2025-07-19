@@ -10,11 +10,18 @@
     },
     "dependencies": {
         "@contentful/rich-text-react-renderer": "^15.21.2",
+        "@radix-ui/react-navigation-menu": "^1.2.13",
+        "@radix-ui/react-slot": "^1.2.3",
+        "class-variance-authority": "^0.7.1",
+        "clsx": "^2.1.1",
         "contentful": "^10.12.2",
         "lodash": "^4.17.21",
+        "lucide-react": "^0.525.0",
         "next": "^14.2.4",
         "react": "^18.3.1",
-        "react-dom": "^18.3.1"
+        "react-dom": "^18.3.1",
+        "tailwind-merge": "^3.3.1",
+        "tailwindcss-animate": "^1.0.7"
     },
     "devDependencies": {
         "autoprefixer": "^10.4.19",

@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import richtextRenderOptions from "../lib/richtextRenderOptions";
 import ImageComponent from "./ImageComponent";
+import { Button } from "@/components/ui/button";
 
 const ProductCardComponent = (props) => {
   const router = useRouter();
@@ -47,12 +48,12 @@ const ProductCardComponent = (props) => {
               )}
             </div>
             <p className=" text-xl ">${fields.price}</p>
-            <button
+            <Button
               onClick={() => router.push(`/products/${fields.slug}`)}
-              className=" bg-black text-white hover:bg-neuter rounded shadow-md"
+              className="bg-black text-white hover:bg-neuter rounded shadow-md"
             >
               BUY
-            </button>
+            </Button>
           </div>
 
           <div className=" h-1/3"></div>
