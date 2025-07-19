@@ -77,19 +77,134 @@ const NavComponent = (props) => {
           const label = _.get(navItem, "fields.label");
           const url = getNavigationUrl(navItem);
           const openInNewTab = _.get(navItem, "fields.openInNewTab", false);
+          const sublinks = _.get(navItem, "fields.sublinks", []);
 
+          console.log("sublinks", sublinks);
+
+          // If the item has sublinks, render as dropdown
+          if (sublinks && sublinks.length > 0) {
+            return (
+              <NavigationMenuItem key={navId}>
+                <NavigationMenuTrigger>{label}</NavigationMenuTrigger>
+                <NavigationMenuContent>
+                  <ul className="grid min-w-max gap-2 p-4">
+                    {sublinks.map((sublink) => {
+                      const sublinkId = _.get(sublink, "sys.id");
+                      const sublinkLabel = _.get(sublink, "fields.label");
+                      const sublinkUrl = getNavigationUrl(sublink);
+                      const sublinkOpenInNewTab = _.get(
+                        sublink,
+                        "fields.openInNewTab",
+                        false
+                      );
+                      const sublinkSublinks = _.get(
+                        sublink,
+                        "fields.sublinks",
+                        []
+                      );
+
+                      // If this sublink has its own sublinks (third level)
+                      if (sublinkSublinks && sublinkSublinks.length > 0) {
+                        return (
+                          <li key={sublinkId} className="space-y-2">
+                            {/* Second level parent item */}
+                            <div className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground">
+                              <div className="text-sm font-medium leading-none">
+                                {sublinkLabel}
+                              </div>
+                            </div>
+                            {/* Third level items displayed inline */}
+                            <ul className="ml-4 space-y-1">
+                              {sublinkSublinks.map((thirdLevelLink) => {
+                                const thirdLevelId = _.get(
+                                  thirdLevelLink,
+                                  "sys.id"
+                                );
+                                const thirdLevelLabel = _.get(
+                                  thirdLevelLink,
+                                  "fields.label"
+                                );
+                                const thirdLevelUrl =
+                                  getNavigationUrl(thirdLevelLink);
+                                const thirdLevelOpenInNewTab = _.get(
+                                  thirdLevelLink,
+                                  "fields.openInNewTab",
+                                  false
+                                );
+
+                                return (
+                                  <li key={thirdLevelId}>
+                                    <NavigationMenuLink asChild>
+                                      <Link
+                                        href={thirdLevelUrl}
+                                        className="block select-none space-y-1 rounded-md p-2 pl-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground text-sm text-muted-foreground hover:text-accent-foreground"
+                                        target={
+                                          thirdLevelOpenInNewTab
+                                            ? "_blank"
+                                            : "_self"
+                                        }
+                                        rel={
+                                          thirdLevelOpenInNewTab
+                                            ? "noopener noreferrer"
+                                            : undefined
+                                        }
+                                      >
+                                        {thirdLevelLabel}
+                                      </Link>
+                                    </NavigationMenuLink>
+                                  </li>
+                                );
+                              })}
+                            </ul>
+                          </li>
+                        );
+                      }
+
+                      // Regular second-level link without third-level sublinks
+                      return (
+                        <li key={sublinkId}>
+                          <NavigationMenuLink asChild>
+                            <Link
+                              href={sublinkUrl}
+                              className="block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground"
+                              target={sublinkOpenInNewTab ? "_blank" : "_self"}
+                              rel={
+                                sublinkOpenInNewTab
+                                  ? "noopener noreferrer"
+                                  : undefined
+                              }
+                            >
+                              <div className="text-sm font-medium leading-none">
+                                {sublinkLabel}
+                              </div>
+                            </Link>
+                          </NavigationMenuLink>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                </NavigationMenuContent>
+              </NavigationMenuItem>
+            );
+          }
+
+          // If no sublinks, render as regular link wrapped in its own ul
           return (
             <NavigationMenuItem key={navId}>
-              <NavigationMenuLink asChild>
-                <Link
-                  href={url}
-                  className={navigationMenuTriggerStyle()}
-                  target={openInNewTab ? "_blank" : "_self"}
-                  rel={openInNewTab ? "noopener noreferrer" : undefined}
-                >
-                  {label}
-                </Link>
-              </NavigationMenuLink>
+              <ul className="list-none">
+                <li>
+                  <NavigationMenuLink asChild>
+                    <Link
+                      href={url}
+                      className={navigationMenuTriggerStyle()}
+                      target={openInNewTab ? "_blank" : "_self"}
+                      rel={openInNewTab ? "noopener noreferrer" : undefined}
+                    >
+                      {label}
+                    </Link>
+                  </NavigationMenuLink>
+                </li>
+              </ul>
             </NavigationMenuItem>
           );
         })}
