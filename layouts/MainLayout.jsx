@@ -16,10 +16,6 @@ const MainLayout = (props) => {
       </Head>
 
       <div className="mt-4 p-2 bg-blau text-white flex items-center gap-4">
-        <Link href="/" className="hover:text-gelb transition-colors">
-          Home
-        </Link>
-
         <NavComponent globalNavigation={globalNavigation} />
       </div>
 

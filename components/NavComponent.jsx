@@ -40,15 +40,6 @@ const NavComponent = (props) => {
   const globalNavigation = _.get(props, "globalNavigation", null);
   const primaryLinks = _.get(globalNavigation, "fields.primaryLinks", []);
 
-  // Only log when there's actual data to avoid noise
-  if (globalNavigation) {
-    console.log(
-      "NavComponent: Navigation loaded with",
-      primaryLinks.length,
-      "items"
-    );
-  }
-
   // If no navigation data is available, show a fallback
   if (
     !globalNavigation ||
@@ -64,7 +55,13 @@ const NavComponent = (props) => {
 
   // Helper function to get the URL for a navigation item
   const getNavigationUrl = (navItem) => {
+    // Handle both resolved entries and link references
     const fields = _.get(navItem, "fields", {});
+
+    // If this is just a link reference without fields, return fallback
+    if (!fields || Object.keys(fields).length === 0) {
+      return "#";
+    }
 
     // Check for external URL first
     if (fields.url) {
@@ -103,11 +100,18 @@ const NavComponent = (props) => {
           const openInNewTab = _.get(navItem, "fields.openInNewTab", false);
           const sublinks = _.get(navItem, "fields.sublinks", []);
 
+          // Skip items that are unresolved references
+          if (!navItem.fields || Object.keys(navItem.fields).length === 0) {
+            return null;
+          }
+
           // If the item has sublinks, render with dropdown content
           if (sublinks && sublinks.length > 0) {
             return (
               <NavigationMenuItem key={navId}>
-                <NavigationMenuTrigger>{label}</NavigationMenuTrigger>
+                <NavigationMenuTrigger className="nav-text-white">
+                  {label}
+                </NavigationMenuTrigger>
                 <NavigationMenuContent>
                   <ul className="grid gap-3 p-6 md:w-[500px] lg:w-[600px] xl:w-[700px] lg:grid-cols-[.6fr_1fr]">
                     <li className="row-span-3">
@@ -127,26 +131,27 @@ const NavComponent = (props) => {
                       </NavigationMenuLink>
                     </li>
                     {sublinks.slice(0, 3).map((sublink) => {
+                      // Skip unresolved sublinks
+                      if (
+                        !sublink.fields ||
+                        Object.keys(sublink.fields).length === 0
+                      ) {
+                        return null;
+                      }
+
                       const sublinkId = _.get(sublink, "sys.id");
                       const sublinkLabel = _.get(sublink, "fields.label");
                       const sublinkUrl = getNavigationUrl(sublink);
                       const sublinkDescription = _.get(
                         sublink,
                         "fields.description",
-                        `Level 1 ${sublinkLabel.toLowerCase()}`
+                        `Level 1`
                       );
                       const thirdLevelLinks = _.get(
                         sublink,
                         "fields.sublinks",
                         []
                       );
-
-                      // Debug logging for third level links
-                      if (thirdLevelLinks.length > 0) {
-                        console.log(
-                          `Found ${thirdLevelLinks.length} third-level links for: ${sublinkLabel}`
-                        );
-                      }
 
                       // If this sublink has its own sublinks (level 3), render them as nested
                       if (thirdLevelLinks && thirdLevelLinks.length > 0) {
@@ -171,6 +176,12 @@ const NavComponent = (props) => {
                             <div className="ml-4 space-y-1 border-l-2 border-border/50 pl-3">
                               {thirdLevelLinks
                                 .slice(0, 3)
+                                .filter(
+                                  (thirdLevelLink) =>
+                                    thirdLevelLink.fields &&
+                                    Object.keys(thirdLevelLink.fields).length >
+                                      0
+                                )
                                 .map((thirdLevelLink) => {
                                   const thirdLevelId = _.get(
                                     thirdLevelLink,
@@ -185,9 +196,95 @@ const NavComponent = (props) => {
                                   const thirdLevelDescription = _.get(
                                     thirdLevelLink,
                                     "fields.description",
-                                    `Level 2 ${thirdLevelLabel.toLowerCase()}`
+                                    `Level 2`
+                                  );
+                                  const fourthLevelLinks = _.get(
+                                    thirdLevelLink,
+                                    "fields.sublinks",
+                                    []
                                   );
 
+                                  // If this third-level link has its own sublinks (level 4), render them as nested
+                                  if (
+                                    fourthLevelLinks &&
+                                    fourthLevelLinks.length > 0
+                                  ) {
+                                    return (
+                                      <div
+                                        key={thirdLevelId}
+                                        className="space-y-2"
+                                      >
+                                        {/* Parent third-level link */}
+                                        <NavigationMenuLink asChild>
+                                          <Link
+                                            href={thirdLevelUrl}
+                                            className="block select-none rounded-md p-2 text-xs leading-none no-underline outline-none transition-colors hover:bg-accent/50 hover:text-accent-foreground focus:bg-accent/50 focus:text-accent-foreground"
+                                          >
+                                            <div className="font-medium text-xs">
+                                              {thirdLevelLabel}
+                                            </div>
+                                            <p className="line-clamp-1 text-xs text-muted-foreground/80">
+                                              {thirdLevelDescription}
+                                            </p>
+                                          </Link>
+                                        </NavigationMenuLink>
+
+                                        {/* Nested fourth-level links */}
+                                        <div className="ml-3 space-y-1 border-l border-border/30 pl-2">
+                                          {fourthLevelLinks
+                                            .slice(0, 2)
+                                            .filter(
+                                              (fourthLevelLink) =>
+                                                fourthLevelLink.fields &&
+                                                Object.keys(
+                                                  fourthLevelLink.fields
+                                                ).length > 0
+                                            )
+                                            .map((fourthLevelLink) => {
+                                              const fourthLevelId = _.get(
+                                                fourthLevelLink,
+                                                "sys.id"
+                                              );
+                                              const fourthLevelLabel = _.get(
+                                                fourthLevelLink,
+                                                "fields.label"
+                                              );
+                                              const fourthLevelUrl =
+                                                getNavigationUrl(
+                                                  fourthLevelLink
+                                                );
+                                              const fourthLevelDescription =
+                                                _.get(
+                                                  fourthLevelLink,
+                                                  "fields.description",
+                                                  `Level 3`
+                                                );
+
+                                              return (
+                                                <NavigationMenuLink
+                                                  key={fourthLevelId}
+                                                  asChild
+                                                >
+                                                  <Link
+                                                    href={fourthLevelUrl}
+                                                    className="block select-none rounded-md p-1.5 text-xs leading-none no-underline outline-none transition-colors hover:bg-accent/30 hover:text-accent-foreground focus:bg-accent/30 focus:text-accent-foreground"
+                                                  >
+                                                    <div className="font-medium text-xs text-foreground/90">
+                                                      {fourthLevelLabel}
+                                                    </div>
+                                                    <p className="line-clamp-1 text-xs text-muted-foreground/70">
+                                                      {fourthLevelDescription}
+                                                    </p>
+                                                  </Link>
+                                                </NavigationMenuLink>
+                                              );
+                                            })}
+                                        </div>
+                                      </div>
+                                    );
+                                  }
+
+                                  // If no fourth-level links, render as regular third-level item
                                   return (
                                     <NavigationMenuLink
                                       key={thirdLevelId}
@@ -233,7 +330,7 @@ const NavComponent = (props) => {
           return (
             <NavigationMenuItem key={navId}>
               <NavigationMenuLink
-                className={navigationMenuTriggerStyle()}
+                className={cn(navigationMenuTriggerStyle(), "nav-text-white")}
                 asChild
               >
                 <Link

@@ -21,8 +21,6 @@ const ProductCardComponent = (props) => {
     return () => {};
   }, []);
 
-  console.log("description field", fields.description);
-
   if (!fields) {
     return "";
   }
